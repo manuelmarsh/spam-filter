@@ -3,7 +3,7 @@
 """
 Created on Mon Dec  2 15:10:34 2024
 
-@author: tommasofogarin
+@author: tommasofogarin e manuelmartini
 """
 
 import numpy as np
@@ -21,15 +21,21 @@ from sklearn.metrics import precision_score, recall_score, f1_score, make_scorer
 
 # Carica il dataset
 columns = [f"feature_{i+1}" for i in range(57)] + ["label"]
-data = pd.read_csv("/Users/tommasofogarin/Desktop/spambase.data", header=None, names=columns)
+data = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data", header=None, names=columns)
+print(data)
 
 # Separiamo le caratteristiche dalle etichette
-X = data.iloc[:, :54]  # Usa le prime 54 caratteristiche (frequenze di parole/simboli)
 y = data.iloc[:, 57]   # Usa la 58esima caratteristica come etichetta (spam/ham)
+X = data.iloc[:, :54]  # Usa le prime 54 caratteristiche (frequenze di parole/simboli)
+
+# Bilanciamento delle classi sapendo che #(spam) < #(non_spam)
+spam = X[X["label"] == 1]
+non_spam_sample = X[X["label"] == 0].sample(n=len(spam), random_state=42)
+X_bal = pd.concat([spam, non_spam_sample]).sample(frac=1, random_state=42)  # Mischiare le righe
 
 # Applicare la trasformazione TF-IDF
 tfidf = TfidfTransformer()
-X_tfidf = tfidf.fit_transform(X).toarray()
+X_tfidf = tfidf.fit_transform(X_bal).toarray()
 
 # Standardizzare i dati
 #scaler = StandardScaler()
