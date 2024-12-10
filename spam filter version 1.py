@@ -22,20 +22,19 @@ from sklearn.metrics import precision_score, recall_score, f1_score, make_scorer
 # Carica il dataset
 columns = [f"feature_{i+1}" for i in range(57)] + ["label"]
 data = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data", header=None, names=columns)
-print(data)
-
-# Separiamo le caratteristiche dalle etichette
-y = data.iloc[:, 57]   # Usa la 58esima caratteristica come etichetta (spam/ham)
-X = data.iloc[:, :54]  # Usa le prime 54 caratteristiche (frequenze di parole/simboli)
 
 # Bilanciamento delle classi sapendo che #(spam) < #(non_spam)
-spam = X[X["label"] == 1]
-non_spam_sample = X[X["label"] == 0].sample(n=len(spam), random_state=42)
-X_bal = pd.concat([spam, non_spam_sample]).sample(frac=1, random_state=42)  # Mischiare le righe
+spam = data[data["label"] == 1]
+non_spam_sample = data[data["label"] == 0].sample(n=len(spam), random_state=42)
+data_bal = pd.concat([spam, non_spam_sample]).sample(frac=1, random_state=42)  # Mischiare le righe
+
+# Separiamo le caratteristiche dalle etichette
+X = data.iloc[:, :54]  # Usa le prime 54 caratteristiche (frequenze di parole/simboli)
+y = data.iloc[:, 57]   # Usa la 58esima caratteristica come etichetta (spam/ham)
 
 # Applicare la trasformazione TF-IDF
 tfidf = TfidfTransformer()
-X_tfidf = tfidf.fit_transform(X_bal).toarray()
+X_tfidf = tfidf.fit_transform(X).toarray()
 
 # Standardizzare i dati
 #scaler = StandardScaler()
